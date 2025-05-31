@@ -160,12 +160,18 @@ SettingsDialog::SettingsDialog(std::span<const QString> physical_devices,
 #if (QT_VERSION < QT_VERSION_CHECK(6, 7, 0))
         connect(ui->updateCheckBox, &QCheckBox::stateChanged, this,
                 [](int state) { Config::setAutoUpdate(state == Qt::Checked); });
+        
+        connect(ui->startupUpdateCheckBox, &QCheckBox::stateChanged, this,
+                [](int state) { Config::setStartupUpdate(state == Qt::Checked); });
 
         connect(ui->changelogCheckBox, &QCheckBox::stateChanged, this,
                 [](int state) { Config::setAlwaysShowChangelog(state == Qt::Checked); });
 #else
         connect(ui->updateCheckBox, &QCheckBox::checkStateChanged, this,
                 [](Qt::CheckState state) { Config::setAutoUpdate(state == Qt::Checked); });
+
+        connect(ui->startupUpdateCheckBox, &QCheckBox::checkStateChanged, this,
+                [](Qt::CheckState state) { Config::setStartupUpdate(state == Qt::Checked); });
 
         connect(ui->changelogCheckBox, &QCheckBox::checkStateChanged, this,
                 [](Qt::CheckState state) { Config::setAlwaysShowChangelog(state == Qt::Checked); });
@@ -485,6 +491,7 @@ void SettingsDialog::LoadValuesFromConfig() {
 
 #ifdef ENABLE_UPDATER
     ui->updateCheckBox->setChecked(toml::find_or<bool>(data, "General", "autoUpdate", false));
+    ui->startupUpdateCheckBox->setChecked(toml::find_or<bool>(data, "General", "startupUpdate", false));
     ui->changelogCheckBox->setChecked(
         toml::find_or<bool>(data, "General", "alwaysShowChangelog", false));
 
@@ -768,6 +775,7 @@ void SettingsDialog::UpdateSettings() {
     Config::setCollectShaderForDebug(ui->collectShaderCheckBox->isChecked());
     Config::setCopyGPUCmdBuffers(ui->copyGPUBuffersCheckBox->isChecked());
     Config::setAutoUpdate(ui->updateCheckBox->isChecked());
+    Config::setStartupUpdate(ui->startupUpdateCheckBox->isChecked());
     Config::setAlwaysShowChangelog(ui->changelogCheckBox->isChecked());
     Config::setUpdateChannel(channelMap.value(ui->updateComboBox->currentText()).toStdString());
     Config::setChooseHomeTab(
